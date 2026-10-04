@@ -62,24 +62,46 @@ stops and says so rather than passing nothing to the next tool.
 
 ### `search_listings`
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Searches the listings data for items matching a
+  description, optionally filtered by size and a price ceiling.
+- **Inputs:**
+  - `description` (str)
+  - `size` (str or None)
+  - `max_price` (float or None)
+- **Returns:** A list of listing dicts, best match first, at most
+  `config.SEARCH_RESULT_LIMIT` of them. Each dict has all 11 fields:
+  `id`, `title`, `description`, `category`, `style_tags`, `size`,
+  `condition`, `price`, `colors`, `brand`, `platform`.
+- **When it has nothing:** Returns an empty list `[]`. Not `None`, not
+  an exception. The loop branches on this.
 
 ### `suggest_outfit`
 
-- **What it does:**
+- **What it does:** Given a thrifted item and the user's wardrobe,
+  suggests one or two outfits.
 - **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+  - `new_item` (dict)
+  - `wardrobe` (dict)
+- **Returns:** A non-empty string with outfit suggestions. When the
+  wardrobe has items, the string names specific pieces the user
+  already owns. When the wardrobe is empty, it returns general styling
+  advice for the new item.
+- **When it has nothing:** With `wardrobe["items"] == []`, returns
+  general styling advice rather than raising or returning an empty
+  string.
 
 ### `create_fit_card`
 
-- **What it does:**
+- **What it does:** Writes a short caption someone would actually post
+  about the find.
 - **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+  - `outfit` (str)
+  - `new_item` (dict)
+- **Returns:** A two-to-four sentence caption that reads like a real
+  post, mentions the item and its price and platform once each, and is
+  specific about the vibe.
+- **When it has nothing:** If `outfit` is empty or whitespace-only,
+  returns a descriptive message rather than raising.
 
 ---
 
@@ -96,13 +118,19 @@ stops and says so rather than passing nothing to the next tool.
      The grader checks your code against what you claim here, so the file and
      function have to be real. -->
 
-**Branch rule:**
+**Branch rule:** If `search_listings` returns an empty list, put a
+message in the session naming what the user could change and stop.
+Otherwise, take the first result and put it in
+`session["selected_item"]`, then call `suggest_outfit` with that item
+and the user's wardrobe.
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** TODO
 
-**What moves through the session:** <!-- which fields, in what order -->
+**What moves through the session:** `session["query"]` → `session["search_results"]`
+→ `session["selected_item"]` → `session["outfit"]` →
+`session["fit_card"]`.
 
 ---
 
