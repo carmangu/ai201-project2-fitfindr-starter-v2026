@@ -126,11 +126,10 @@ and the user's wardrobe.
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** TODO
+**How the query is parsed:** Regex
 
-**What moves through the session:** `session["query"]` → `session["search_results"]`
-→ `session["selected_item"]` → `session["outfit"]` →
-`session["fit_card"]`.
+**What moves through the session:** `session["query"]` → `session["parsed"]` → `session["search_results"]` → `session["selected_item"]` → `session["outfit_suggestion"]` → `session["fit_card"]`. If the search returns empty, `session["error"]` is set and the
+later fields stay `None`.
 
 ---
 
@@ -145,6 +144,37 @@ and the user's wardrobe.
 
 ```
 $ python app.py ask '...'
+
+=== A query the data can match ===
+  found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+  outfit:   Here are two outfit ideas combining the Y2K butterfly baby tee with pieces you already own:
+
+### Outfit 1: Streetwear Contrast
+*Balance out the fitted, hyper-feminine silhouette of the baby tee with some heavy Y2K streetwear proportions.*
+* **Top:** Y2K Butterfly Baby Tee ($18)
+* **Bottoms:** Baggy straight-leg jeans (dark wash)
+* **Outerwear:** Black cropped zip hoodie (worn open or slung casually over the shoulders)
+* **Shoes:** Chunky white sneakers
+* **Accessories:** Black crossbody bag
+
+### Outfit 2: Casual Earthy Minimal
+*Play into the cottagecore/vintage tags on the tee by pairing it with relaxed neutrals for an effortless everyday look.*
+* **Top:** Y2K Butterfly Baby Tee ($18)
+* **Bottoms:** Wide-leg khaki trousers
+* **Accessories:** Brown leather belt + Black crossbody bag
+* **Shoes:** Chunky white sneakers (or swap for black combat boots to add a little edge)
+* **Outerwear:** Vintage black denim jacket (for cooler weather)
+  fit card: Scored this absolute dream of a butterfly print Y2K baby tee on depop for just $18! Obsessed with how the hyp
+er-feminine graphic looks styled down with baggy low-rise jeans and chunky sneakers for the ultimate nostalgic street vib
+e.
+
+=== A query it can't ===
+  stopped: No listings matched 'designer ballgown'. Try one of: try a different size (you asked for XXS); raise your pric
+e ceiling ($5.0); or use fewer keywords in your description.
+  fit_card is None — it should still be None here
+
+The second one should stop before the fit card. If both paths look the same,
+the branch isn't doing anything yet.
 
 ```
 
