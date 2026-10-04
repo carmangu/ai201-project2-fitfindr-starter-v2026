@@ -25,9 +25,7 @@ Given a query that matches at least one listing, the agent completes all three
 tool calls and returns a fit card — in at least 4 of 5 tries.
 
 **Why this target:**
-<!-- Why 4 of 5 and not 5 of 5? Something about your search, probably —
-     "my search is a plain keyword match and some phrasings will miss" is a
-     real answer. -->
+The happy path is the baseline. Pick 4 of 5 rather than 5 of 5 because the search is a keyword overlap match, and some phrasings will fall just under the threshold even when a human would say the listing matches.
 
 ---
 
@@ -37,66 +35,60 @@ Given a query that matches no listings, the agent stops before calling
 `suggest_outfit` and returns a message naming what to change — 5 of 5 tries.
 
 **Why this target:**
-<!-- Why is 5 of 5 reasonable here when criterion 1 isn't? What's different
-     about this path? -->
+This is the branch. If it fails, the agent is a list of function calls, not a loop.
+Pick 5 of 5 because the check is mechanical: either `suggest_outfit` was called or
+it wasn't, and the message either names a change or it doesn't.
+There is no fuzziness to allow for.
 
 ---
 
-## 3. Something about state
+## 3. State carries the item through
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know that the item your search found is the same item the
-     next tool received? Name something countable or observable.
-
-     This is the criterion people find hardest, because state failure doesn't
-     look like state failure — it looks like a tool problem. Something that
-     compares session["selected_item"] against what actually reached
-     suggest_outfit is the shape you're after. -->
-
-
+The item `search_listings` returns is the same item `suggest_outfit`
+receives. When I run 5 queries that match at least one listing, in all
+5 the `session["selected_item"]["id"]` equals the `id` of the first
+listing in `session["search_results"]`.
 
 **Why this target:**
-
-
+The state criterion exists to catch a loop that
+re-searches or re-parses instead of reading what the previous tool
+returned. I pick 5 of 5 because the id comparison is exact — the loop
+either passes the same dict or it doesn't. There is no fuzziness to
+allow for, so any failure is a real bug.
 
 ---
 
-## 4. Something about the fit card
+## 4. Fit card is specific and varies
 
-<!-- YOU WRITE THIS ONE.
-
-     The fit card calls a model, so the same input can produce different words
-     each time. That's not a bug — it's the nature of the tool. So what would
-     make it acceptable?
-
-     Think about what you'd actually be unhappy to see. A caption that never
-     mentions the price? Two different items producing the same opening
-     sentence? A card longer than a caption anyone would post? Any of those can
-     be turned into a number. -->
-
-
+The fit card is non-empty and mentions the item's price and platform at
+least once. When I run `create_fit_card` 5 times on the same item, all
+5 outputs mention both, and at least 3 of the 5 are different from each
+other word-for-word.
 
 **Why this target:**
-
-
+The fit card calls a model, so identical wording
+across runs would suggest the cache or temperature is wrong — the brief
+calls this out. I pick 3 of 5 different because two runs occasionally
+landing on the same phrasing is normal, but if all five come back
+identical something is frozen. The price and platform requirement is
+separate: it is what makes the caption read like a real post rather
+than a generic description, and it is something a reader can check
+without judgment.
 
 ---
 
-## 5. Your choice
+## 5. Agent responds within 30 seconds
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. Speed, the empty
-     wardrobe path, what happens when the model can't be reached, whether the
-     search respects a price ceiling — anything, as long as it names a number
-     or an observable outcome. -->
-
-
+Given a query that matches at least one listing, the agent returns a
+fit card within 30 seconds — in at least 4 of 5 tries.
 
 **Why this target:**
-
-
+This one is about latency, which none of the
+other four cover. The agent makes three tool calls and two of them hit
+the model; if the pacing adapter is misconfigured or the loop retries,
+a query can take minutes. 30 seconds is generous for two model calls
+under the starter's pacing, and 4 of 5 allows one slow run without
+calling the whole thing broken.
 
 ---
 
