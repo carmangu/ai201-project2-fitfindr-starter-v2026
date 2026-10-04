@@ -13,6 +13,7 @@ Build and test your three tools in `tools.py` first. Then come here.
     python agent.py          runs both example paths below
 """
 
+import re
 import config
 import trace
 from tools import search_listings, suggest_outfit, create_fit_card
@@ -48,6 +49,32 @@ def new_session(query: str, wardrobe: dict) -> dict:
 
 
 # ── planning loop ─────────────────────────────────────────────────────────────
+
+def parse_query(query: str) -> dict:
+    """Parse a plain-language query into description, size, max_price."""
+    parsed = {"description": query, "size": None, "max_price": None}
+
+    # Extract "under $N" or "under N"
+    price_match = re.search(r"under\s+\$?(\d+(?:\.\d+)?)", query, re.IGNORECASE)
+    if price_match:
+        parsed["max_price"] = float(price_match.group(1))
+
+    # Extract "size X" where X is alphanumeric
+    size_match = re.search(r"size\s+([A-Za-z0-9/]+)", query, re.IGNORECASE)
+    if size_match:
+        parsed["size"] = size_match.group(1)
+
+    # Description: query minus the price and size clauses
+    desc = query
+    if price_match:
+        desc = desc[:price_match.start()] + desc[price_match.end():]
+    if size_match:
+        desc = desc[:size_match.start()] + desc[size_match.end():]
+    # Clean up trailing commas, "and", etc.
+    desc = re.sub(r"\s+", " ", desc).strip(" ,.")
+    parsed["description"] = desc
+
+    return parsed
 
 def run_agent(query: str, wardrobe: dict) -> dict:
     """
@@ -105,12 +132,63 @@ def run_agent(query: str, wardrobe: dict) -> dict:
       • A handler for ModelUnavailable, so a bad key produces a message rather
         than a stack trace. The import is already at the top of this file.
     """
+    # session = new_session(query, wardrobe)
+
+    # # TODO: delete these two lines and build the loop.
+    # session["error"] = "The planning loop isn't built yet — see the TODO in agent.py."
+    # return session
+    
     session = new_session(query, wardrobe)
 
-    # TODO: delete these two lines and build the loop.
-    session["error"] = "The planning loop isn't built yet — see the TODO in agent.py."
-    return session
+    # 1. Parse the query
+    session["parsed"] = parse_query(query)
 
+    # 2. Count iterations, check against MAX_ITERATIONS
+    count = 0
+    trace.check_iterations(count)
+
+    # 3. Search listings
+    results = search_listings(
+        description=session["parsed"]["description"],
+        size=session["parsed"]["size"],
+        max_price=session["parsed"]["max_price"],
+    )
+    session["search_results"] = results
+
+    # 4. BRANCH: if empty, stop
+    if not results:
+        parsed = session["parsed"]
+        suggestions = []
+        if parsed["size"] is not None:
+            suggestions.append(f"try a different size (you asked for {parsed['size']})")
+        if parsed["max_price"] is not None:
+            suggestions.append(f"raise your price ceiling (${parsed['max_price']})")
+        suggestions.append("or use fewer keywords in your description")
+        session["error"] = (
+            f"No listings matched '{parsed['description']}'. "
+            f"Try one of: {'; '.join(suggestions)}."
+        )
+        return session
+
+    # 5. Choose the first result
+    session["selected_item"] = results[0]
+
+    # 6. Suggest outfit
+    count += 1
+    trace.check_iterations(count)
+    session["outfit_suggestion"] = suggest_outfit(
+        session["selected_item"], session["wardrobe"]
+    )
+
+    # 7. Create fit card
+    count += 1
+    trace.check_iterations(count)
+    session["fit_card"] = create_fit_card(
+        session["outfit_suggestion"], session["selected_item"]
+    )
+
+    # 8. Return
+    return session
 
 # ── running it directly ───────────────────────────────────────────────────────
 
