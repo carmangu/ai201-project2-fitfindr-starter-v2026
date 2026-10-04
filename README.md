@@ -39,9 +39,12 @@
 
 ## What This Does
 
-<!-- Three or four sentences: what a user asks for, and what they get back. -->
-
-
+FitFindr is an agent that takes a plain-language thrift query — like
+"vintage graphic tee under $30, size M" — and searches a listings file
+for matching items, suggests outfits using the user's wardrobe, and
+writes a short caption for the find. It decides which step to take next
+based on what the last one returned: if the search comes back empty, it
+stops and says so rather than passing nothing to the next tool.
 
 ---
 
