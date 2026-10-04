@@ -50,16 +50,6 @@ stops and says so rather than passing nothing to the next tool.
 
 ## Tool Inventory
 
-<!-- Four lines per tool. This is worth 2 points and it's the single most
-     common place students lose them.
-
-     "Returns a list" earns NOTHING. The description has to say what is IN
-     the list.
-
-     The empty case isn't optional either — it's the thing your loop branches
-     on, and if you don't decide it here you'll discover it as a crash in
-     Milestone 5. -->
-
 ### `search_listings`
 
 - **What it does:** Searches the listings data for items matching a
@@ -164,18 +154,14 @@ $ python app.py ask '...'
 * **Accessories:** Brown leather belt + Black crossbody bag
 * **Shoes:** Chunky white sneakers (or swap for black combat boots to add a little edge)
 * **Outerwear:** Vintage black denim jacket (for cooler weather)
-  fit card: Scored this absolute dream of a butterfly print Y2K baby tee on depop for just $18! Obsessed with how the hyp
-er-feminine graphic looks styled down with baggy low-rise jeans and chunky sneakers for the ultimate nostalgic street vib
-e.
+  fit card: Scored this absolute dream of a butterfly print Y2K baby tee on depop for just $18! Obsessed with how the hyper-feminine graphic looks styled down with baggy low-rise jeans and chunky sneakers for the ultimate nostalgic street vibe.
 
 === A query it can't ===
-  stopped: No listings matched 'designer ballgown'. Try one of: try a different size (you asked for XXS); raise your pric
-e ceiling ($5.0); or use fewer keywords in your description.
+  stopped: No listings matched 'designer ballgown'. Try one of: try a different size (you asked for XXS); raise your price ceiling ($5.0); or use fewer keywords in your description.
   fit_card is None — it should still be None here
 
 The second one should stop before the fit card. If both paths look the same,
 the branch isn't doing anything yet.
-
 ```
 
 **The three tools, tested one at a time**
@@ -211,29 +197,33 @@ Scored these vintage Levi's 501 jeans on Depop for just $38.0 and I am obsessed.
 
 #vintage #classic #denim #streetwear
 ```
-
 ---
 
 ## How I Used AI
 
-<!-- Two specific moments. What you asked, what came back, what you changed.
+**Moment 1 — search_listings size filter**
 
-     "I used Claude to help me code" is not enough.
+- *What I asked for:* I asked Claude to sketch a `search_listings`
+  implementation that filters by size.
+- *What came back:* Its first version used
+  `size.lower() in listing["size"].lower()`, a plain substring test.
+- *What I changed:* I had read the data in Milestone 1 and seen
+  listings like `"W30 L30"` and `"XL (oversized)"`, where `"l" in "xl"`
+  is True and `"s" in "us 9"` is True. I replaced the substring test
+  with a tokenized match: split both sides on non-alphanumerics and
+  compare whole tokens. That way `"M"` matches `"M"` and `"S/M"` but
+  not `"W30 L30"`.
 
-     "I gave Claude my search_listings spec. It returned None on no match
-     instead of an empty list, so I changed it" is the level we want. -->
+**Moment 2 — create_fit_card prompt**
 
-**Moment 1**
-
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
-
-**Moment 2**
-
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I asked Claude to write a prompt for the fit card
+  tool that would produce a caption for social media.
+- *What came back:* A prompt that listed the item's title and style
+  tags, but not its price or platform.
+- *What I changed:* I added explicit instructions to mention the price
+  and platform once each, because criterion 4 checks that. I also
+  specified "two-to-four sentences" and "reads like a real post, not a
+  product description" to match the tool spec.
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
