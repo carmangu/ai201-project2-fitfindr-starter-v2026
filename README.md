@@ -294,33 +294,59 @@ that produced it:
 
 ## Loop Trace
 
-<!-- One full run, printed step by step, with the MCP call visible in it.
-
-     `python app.py ask '...' --trace` once you've added the trace.step()
-     calls in Milestone 2.
-
-     Worth pasting BOTH the happy path and the empty-search path. The empty
-     one should be visibly shorter, because it stops. If your two traces are
-     the same length, your branch isn't working — and this is the fastest way
-     anyone will ever find that out. -->
+Produced by `agent.py::run_agent` with `python app.py ask '...' --trace`.
 
 **Happy path**
 
 ```
-
+$ python app.py ask 'vintage graphic tee under $30' --trace
+[1] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 items: Y2K Baby Tee — Butterfly Print, Graphic Tee — 2003 Tour Bootleg Style, Vintage Band Tee — Faded Grey … +7 more
+[2] suggest_outfit
+      in:  dict with keys: new_item, wardrobe_items
+      out: Here are two outfit ideas combining the Y2K butterfly baby tee with pieces you already own: ...
+[3] create_fit_card
+      in:  dict with keys: new_item, outfit_len
+      out: Scored this absolute dream of a butterfly print Y2K baby tee on depop for just $18! ...
 ```
 
 **Empty search**
 
 ```
+$ python app.py ask 'designer ballgown size XXS under $5' --trace
+[1] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: [] (empty)
+[2] branch
+      →    empty search, stopping before suggest_outfit
 
+  No listings matched 'designer ballgown'. Try one of: try a different size (you asked for XXS); raise your price ceiling ($5.0); use fewer keywords in your description.
+
+0 model calls this session
 ```
 
-**On the MCP move:** <!-- what changed in your code, and whether anything
-behaved differently afterwards. If the rewire didn't work, say exactly where it
-broke — the error text and the last thing that worked. That earns the point in
-full. -->
+**Model unavailable — handler catches**
 
+```
+$ python app.py ask 'vintage graphic tee under $30' --empty-wardrobe
+[1] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 items: Y2K Baby Tee — Butterfly Print, ...
+[2] suggest_outfit
+      →    ModelUnavailable: Couldn't reach the model. Check your internet connection and try again.
+
+  The model couldn't be reached while styling this item. Check your internet connection or API key, then try again. (Details: Couldn't reach the model. Check your internet connection and try again.)
+
+1 model calls this session
+```
+
+**On the MCP move:** `search_listings` was moved onto the MCP server in
+Milestone 1. `agent.py::run_agent` now calls it via
+`mcp_client.call_tool("search_listings", {...})`. The return value is
+unchanged, so nothing downstream behaved differently. The step name in
+the trace marks it as `search_listings (via MCP)` so the MCP call is
+visible.
 
 
 ---
