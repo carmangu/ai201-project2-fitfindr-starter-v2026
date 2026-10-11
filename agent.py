@@ -83,7 +83,6 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     count = 0
     trace.check_iterations(count)
 
-    # Step 1: search_listings (via MCP)
     session["search_results"] = call_tool("search_listings", {
         "description": session["parsed"]["description"],
         "size": session["parsed"]["size"],
@@ -93,7 +92,6 @@ def run_agent(query: str, wardrobe: dict) -> dict:
                inputs=session["parsed"],
                returned=session["search_results"])
 
-    # Step 2: branch — empty search stops the loop
     if not session["search_results"]:
         p = session["parsed"]
         hints = []
@@ -111,7 +109,6 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
     session["selected_item"] = session["search_results"][0]
 
-    # Step 3: suggest_outfit
     count += 1
     trace.check_iterations(count)
     try:
@@ -131,7 +128,6 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         trace.step("suggest_outfit", note=f"ModelUnavailable: {exc}")
         return session
 
-    # Step 4: create_fit_card
     count += 1
     trace.check_iterations(count)
     try:
