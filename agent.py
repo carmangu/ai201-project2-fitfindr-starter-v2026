@@ -13,6 +13,7 @@ Build and test your three tools in `tools.py` first. Then come here.
     python agent.py          runs both example paths below
 """
 
+from mcp_client import call_tool
 import re
 import config
 import trace
@@ -147,14 +148,13 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     count = 0
     trace.check_iterations(count)
 
-    # 3. Search listings
-    results = search_listings(
-        description=session["parsed"]["description"],
-        size=session["parsed"]["size"],
-        max_price=session["parsed"]["max_price"],
-    )
-    session["search_results"] = results
-
+    session["search_results"] = call_tool("search_listings", {
+        "description": session["parsed"]["description"],
+        "size": session["parsed"]["size"],
+        "max_price": session["parsed"]["max_price"],
+    })
+    results = session["search_results"]
+    
     # 4. BRANCH: if empty, stop
     if not results:
         parsed = session["parsed"]
