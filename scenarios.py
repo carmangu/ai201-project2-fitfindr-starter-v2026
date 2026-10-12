@@ -35,18 +35,31 @@ SCENARIOS = [
         "wardrobe": "empty",
         "criterion": None,
     },
-    # TODO: add what your criteria 3, 4 and 5 need.
-    #
-    # Set "criterion" to the number in criteria.md that the scenario tests.
-    # "criterion": None means a diagnostic run — useful to have, but it isn't
-    # one of your five, and run_eval.py marks it as such in the table.
-    #
-    # For a state criterion, any normal query works — what you're checking is
-    # what ends up in the session, not what the user typed.
-    #
-    # For a fit-card criterion, you probably want the SAME query listed more
-    # than once, or several different items, depending on what your criterion
-    # actually says.
+        {
+        # State check: a query with a size filter, so the selected item
+        # has to survive both the description match and the size match.
+        # Criterion 3.
+        "name": "state carries the item through (size filter)",
+        "query": "90s track jacket in size M",
+        "wardrobe": "example",
+        "criterion": 3,
+    },
+    {
+        # Fit card check: run_eval.py runs this five times, producing
+        # five different captions. Criterion 4 checks all five mention
+        # price and platform, and at least three differ word-for-word.
+        "name": "fit card varies and mentions price+platform",
+        "query": "vintage graphic tee under $30",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        # Latency check: a normal happy-path query. Criterion 5.
+        "name": "latency on a happy-path run",
+        "query": "denim jacket under $50",
+        "wardrobe": "example",
+        "criterion": 5,
+    }
 ]
 
 WARDROBES = ("example", "empty")
