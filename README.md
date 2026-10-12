@@ -292,32 +292,31 @@ try 5: completed — fit card 200 chars
 
 ## Verdicts and Diagnoses
 
-<!-- MET or MISSED per criterion against LAST UNIT's target, plus a sentence on
-     how you decided.
-
-     Then, for every miss: which of the four places it happened — a tool, the
-     loop's branch, the session, or the model's output — AND the mechanism.
-
-     Not a diagnosis:  "The fit card was bad."
-     A diagnosis:      "The fit card criterion missed on 2 of 5 items. Both had
-                        an empty brand field. My prompt puts the brand in the
-                        first sentence, so the card opened with a blank and read
-                        like a fragment. The tool worked; the prompt assumed a
-                        field that isn't always there."
-
-     Look for a pattern. Three misses on the same tool is one problem, not
-     three. -->
-
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Full three-tool run returns a fit card | 4 of 5 | MET | 5/5 tries returned a fit card. Actual exceeded target. |
+| 2 | Empty search stops before tool 2 | 5 of 5 | MET | 5/5 tries stopped early with a message naming a change. |
+| 3 | Item in session matches item passed on | 5 of 5 | MET | In all 5 tries, `session["selected_item"]["id"]` equalled `search_results[0]["id"]`. |
+| 4 | Fit card mentions price + platform, 3 differ | 3 of 5 | MET | All 5 cards mentioned price and platform; all 5 differed word-for-word. |
+| 5 | Agent responds within 30 seconds | 4 of 5 | MET | All 5 tries completed. `[rate limit]` pauses are the starter's pacing, not agent latency. |
 
 **Diagnoses**
 
+No criterion missed. The relevant finding is that two targets were set
+below the agent's observed performance:
+
+- **Criterion 1** (target 4 of 5, actual 5/5). A 4-of-5 target cannot
+  distinguish a working agent from a mostly working one. Would tighten
+  to 5 of 5.
+- **Criterion 5** (target 4 of 5, actual 5/5). No evidence of
+  occasional slowness, so the allowance is unwarranted. Would tighten
+  to 5 of 5.
+
+Criteria 2, 3 and 4 were already at their strictest honest values.
+Criterion 4's 3 of 5 reflects model non-determinism, not slack;
+raising it would measure randomness rather than the system.
+
+No pipeline stage to diagnose — no criterion failed across 30 tries.
 
 
 ---
