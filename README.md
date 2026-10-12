@@ -225,6 +225,22 @@ Scored these vintage Levi's 501 jeans on Depop for just $38.0 and I am obsessed.
   specified "two-to-four sentences" and "reads like a real post, not a
   product description" to match the tool spec.
 
+**Moment 3 — Unit 4: MCP tool description**
+
+- *What I asked for:* I asked Claude to draft the description for the
+  `search_listings` tool that would be registered on the MCP server.
+- *What came back:* A one-sentence description naming the three inputs
+  but omitting what the tool returns, and with no statement of the
+  empty case.
+- *What I changed:* The MCP description is a published contract for any
+  agent that reads it, not a comment for my own code. I rewrote it to
+  state the return shape ("a list of matching listing dicts, best match
+  first, at most SEARCH_RESULT_LIMIT"), to name the size-match rule as
+  a whole-token match ("M" matches "M" and "S/M", not "W30 L30"), and
+  to state that an empty list is returned on no match. Those three
+  details are what makes the tool usable by code that cannot see the
+  implementation.
+
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
      Don't fill these in during unit 3.
@@ -422,11 +438,26 @@ realistic rather than generous.
 
 ## What's Still Broken
 
-<!-- For each criterion still missed: what you'd do, and why you stopped where
-     you did. "I ran out of time" is fine if it's true. Pretending nothing is
-     left is not. -->
+Nothing is broken after the improvement. All five criteria are MET in
+both the before and after runs. The remaining issue is the level of
+two targets, not the system:
 
+- **Criterion 1** (target 4 of 5, actual 5/5 in both runs). A 4-of-5
+  target cannot distinguish a working agent from one that mostly
+  works. Would tighten to 5 of 5.
+- **Criterion 5** (target 4 of 5, actual 5/5 in both runs). The token
+  reduction from the improvement gives latency more margin, so a 5-of-5
+  target is realistic. Would tighten to 5 of 5.
 
+Criteria 2, 3 and 4 are already at their strictest honest values. Both
+2 and 3 are mechanical checks, and 5 of 5 is the only honest target.
+Criterion 4's 3 of 5 is the correct allowance for model
+non-determinism, not slack.
+
+Why I stopped where I did: the brief permits one change in this unit
+and my one change was the prompt rewrite. Tightening criteria 1 and 5
+belongs in the next unit as a criterion revision, not as a second
+change here.
 
 <!-- ═════════════════════════════════════════════════════════════════════
 
