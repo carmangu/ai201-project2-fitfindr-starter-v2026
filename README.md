@@ -382,31 +382,41 @@ visible.
 
 ## The Improvement
 
-<!-- What you changed, why your diagnosis pointed at it, and the after-run in
-     the same table format. One change, measured properly.
+**What I changed:** I rewrote the `suggest_outfit` prompt to cap each
+outfit at two sentences — a one-line vibe and a one-line list of
+pieces — instead of allowing long paragraphs.
 
-     `python run_eval.py --label after` -->
-
-**What I changed:**
-
-**Which failure it was meant to fix:**
+**Which failure it was meant to fix:** No criterion missed in the
+before run. The diagnosis was that two targets (criterion 1 at 4 of 5
+and criterion 5 at 4 of 5) came out 5/5 in every try. The system was
+clearing its targets with room to spare. `suggest_outfit` was
+producing 600+ token responses, which inflated both prompt size and
+latency. Shortening the outfit prompt should tighten the latency
+margin and make a 5-of-5 target on criterion 5 honest.
 
 ### Run Log — After
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Full three-tool run returns a fit card | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 2. Empty search stops before tool 2 | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 3. Item in session matches item passed on | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 4. Fit card mentions price + platform, 3 differ | 3 of 5 | PASS | PASS | PASS | PASS | PASS | MET |
+| 5. Agent responds within 30 seconds | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET |
 
-**Did it help, and how do I know:**
+**Did it help, and how do I know:** Yes. Token counts dropped sharply
+and no criterion regressed.
 
-<!-- If it made things worse, say that. Honestly reported, that earns full
-     credit and is more interesting than one that worked. -->
+| Metric | Before | After | Change |
+|---|---|---|---|
+| Prompt tokens | 15,109 | 11,502 | **-24%** |
+| Output tokens | 8,469 | 4,386 | **-48%** |
+| Total tokens | 23,578 | 15,888 | **-33%** |
 
-
+All five criteria remain MET. Outfit text is now two sentences per
+outfit rather than several paragraphs. The reduced token count gives
+criterion 5's latency target more margin, which makes a 5-of-5 target
+realistic rather than generous.
 
 ---
 

@@ -151,8 +151,12 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
     Test it from a terminal before you move on:
         python -c "from tools import suggest_outfit; from utils.data_loader import get_example_wardrobe, load_listings; print(suggest_outfit(load_listings()[0], get_example_wardrobe()))"
     """
-
+    
     items = wardrobe.get("items", [])
+    brevity = (
+        "Keep each outfit to two sentences: a one-line vibe, "
+        "then a one-line list of pieces. Do not write long paragraphs."
+    )
 
     if not items:
         prompt = (
@@ -162,7 +166,7 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
             f"  Style tags: {', '.join(new_item['style_tags'])}\n\n"
             f"They haven't told us what's in their wardrobe. Suggest one or two "
             f"general outfit ideas for this item. Be specific about the vibe and "
-            f"what kinds of pieces pair well."
+            f"what kinds of pieces pair well. {brevity}"
         )
     else:
         wardrobe_text = "\n".join(
@@ -177,10 +181,10 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
             f"  Style tags: {', '.join(new_item['style_tags'])}\n\n"
             f"Here is what they already own:\n{wardrobe_text}\n\n"
             f"Suggest one or two specific outfits that combine the new item with "
-            f"pieces from their wardrobe. Name the pieces you're using."
+            f"pieces from their wardrobe. Name the pieces you're using. {brevity}"
         )
 
-    return generate(prompt)    
+    return generate(prompt)   
 
 
 # ── Tool 3: create_fit_card ───────────────────────────────────────────────────
